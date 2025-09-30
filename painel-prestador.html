@@ -15,12 +15,13 @@
         <h1>Painel do Prestador</h1>
 
         <div class="card">
-            <h3>Solicitações dos clientes aguardando sua decisão</h3>
-            <table class="tabela-solicitacoes" id="tabela-solicitacoes-prestador">
+            <h3>Novos serviços</h3>
+            <table class="tabela-solicitacoes">
                 <thead>
                     <tr>
                         <th>Número</th>
                         <th>Data</th>
+                        <th>Cliente</th>
                         <th>Tipo/Serviço</th>
                         <th>Valor</th>
                         <th>Dia e hora</th>
@@ -29,7 +30,28 @@
                         <th>Ações</th>
                     </tr>
                 </thead>
-                <tbody id="lista-prestador"></tbody>
+                <tbody id="lista-novos"></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Serviço em execução</h3>
+            <div id="execucao-conteudo"></div>
+        </div>
+
+        <div class="card">
+            <h3>Serviços Pendentes</h3>
+            <table class="tabela-solicitacoes">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Data</th>
+                        <th>Tipo/Serviço</th>
+                        <th>Cliente/Motivo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-pendentes"></tbody>
             </table>
         </div>
     </div>
@@ -127,6 +149,114 @@
                 }
             }
             carregarLista();
+
+            function obter(){
+                try{ return JSON.parse(localStorage.getItem('solicitacoes')||'[]'); }catch(e){ return []; }
+            }
+            function salvar(lista){
+                try{ localStorage.setItem('solicitacoes', JSON.stringify(lista)); }catch(e){}
+            }
+            function temExecucao(lista){
+                for(var i=0;i<lista.length;i++) if((lista[i].status||'').toLowerCase()==='em execução') return i;
+                return -1;
+            }
+            function contarPendentes(lista){
+                return lista.filter(function(it){ return (it.status||'').toLowerCase()==='pendente'; }).length;
+            }
+            function formatBRL(v){ var n=Number(v||0); return isFinite(n)? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'R$ 0,00'; }
+
+            function renderNovos(){
+                var corpo=document.getElementById('lista-novos'); if(!corpo) return; corpo.innerHTML='';
+                var lista=obter();
+                var execIndex=temExecucao(lista);
+                var adicionados=0;
+                lista.forEach(function(it, idx){
+                    var st=(it.status||'');
+                    var origem=(it.origem||'cliente').toLowerCase();
+                    var aguardando = st.indexOf('Aguardando')===0;
+                    var aceito = st==='Aceito pelo Prestador';
+                    if(origem!=='cliente') return;
+                    if(!aguardando && !aceito) return;
+
+                    var tr=document.createElement('tr');
+                    function td(t){ var e=document.createElement('td'); e.textContent=t; tr.appendChild(e);}
+                    td(it.numero||'—');
+                    td(it.data||'—');
+                    td(it.cliente||'—');
+                    td((it.tipo||'')+' - '+(it.servico||''));
+                    td(formatBRL(it.total));
+                    td(((it.dataDesejada||it.data||'') + (it.hora? (' '+it.hora):''))||'—');
+                    td(it.endereco||'—');
+                    td(it.observacoes||it.obs||'—');
+                    var tdA=document.createElement('td');
+
+                    if(aguardando){
+                        var btAce=document.createElement('button'); btAce.className='btn btn-sm'; btAce.textContent='Aceitar';
+                        btAce.addEventListener('click', function(){ lista[idx].status='Aceito pelo Prestador'; salvar(lista); renderTudo(); });
+                        var btRej=document.createElement('button'); btRej.className='btn btn-sm btn-warning'; btRej.textContent='Rejeitar';
+                        btRej.addEventListener('click', function(){ lista[idx].status='Rejeitado pelo Prestador'; salvar(lista); renderTudo(); });
+                        tdA.appendChild(btAce); tdA.appendChild(document.createTextNode(' ')); tdA.appendChild(btRej);
+                    }
+                    if(aceito){
+                        var btIni=document.createElement('button'); btIni.className='btn btn-sm'; btIni.textContent='Iniciar';
+                        btIni.disabled = execIndex !== -1; // só se não houver execuçao
+                        btIni.addEventListener('click', function(){ if(temExecucao(lista)!==-1){return;} lista[idx].status='Em execução'; salvar(lista); renderTudo(); });
+                        tdA.appendChild(btIni);
+                    }
+                    tr.appendChild(tdA);
+                    corpo.appendChild(tr);
+                    adicionados++;
+                });
+                if(adicionados===0){ var tr=document.createElement('tr'); var td=document.createElement('td'); td.colSpan=9; td.textContent='Não há novos serviços.'; tr.appendChild(td); corpo.appendChild(tr);}            }
+
+            function renderExecucao(){
+                var box=document.getElementById('execucao-conteudo'); if(!box) return; box.innerHTML='';
+                var lista=obter(); var idx=temExecucao(lista);
+                if(idx===-1){ box.textContent='Não há serviço em execução.'; return; }
+                var it=lista[idx];
+                var wrap=document.createElement('div');
+                wrap.innerHTML = '<p><strong>Número:</strong> '+(it.numero||'—')+'</p>'+
+                                 '<p><strong>Serviço:</strong> '+((it.tipo||'')+' - '+(it.servico||''))+'</p>'+
+                                 '<p><strong>Cliente:</strong> '+(it.cliente||'—')+'</p>';
+                var bPend=document.createElement('button'); bPend.className='btn btn-sm btn-warning'; bPend.textContent='Colocar Pendente';
+                bPend.addEventListener('click', function(){
+                    var motivo = prompt('Informe o motivo da pendência:');
+                    if(!motivo || !motivo.trim()) { alert('Motivo é obrigatório.'); return; }
+                    if(contarPendentes(lista) >= 3){ alert('Limite máximo de 3 pendências atingido.'); return; }
+                    lista[idx].status='Pendente';
+                    lista[idx].pendenciaMotivo=motivo.trim();
+                    salvar(lista); renderTudo();
+                });
+                var bConc=document.createElement('button'); bConc.className='btn btn-sm'; bConc.textContent='Concluir';
+                bConc.addEventListener('click', function(){ lista[idx].status='Concluída'; lista[idx].concluidoEm=new Date().toISOString(); salvar(lista); renderTudo(); });
+                wrap.appendChild(bPend); wrap.appendChild(document.createTextNode(' ')); wrap.appendChild(bConc);
+                box.appendChild(wrap);
+            }
+
+            function renderPendentes(){
+                var corpo=document.getElementById('lista-pendentes'); if(!corpo) return; corpo.innerHTML='';
+                var lista=obter(); var execAtivo = temExecucao(lista) !== -1; var add=0;
+                lista.forEach(function(it, idx){
+                    if((it.status||'').toLowerCase()!=='pendente') return;
+                    var tr=document.createElement('tr');
+                    function td(t){ var e=document.createElement('td'); e.innerHTML=t; tr.appendChild(e);}
+                    td(it.numero||'—');
+                    td(it.data||'—');
+                    td((it.tipo||'')+' - '+(it.servico||''));
+                    td((it.cliente||'—')+'<br><small>'+(it.pendenciaMotivo||'')+'</small>');
+                    var tdA=document.createElement('td');
+                    var btCont=document.createElement('button'); btCont.className='btn btn-sm'; btCont.textContent='Continuar';
+                    btCont.disabled = execAtivo; // só se não houver execução
+                    btCont.addEventListener('click', function(){ if(temExecucao(lista)!==-1){return;} lista[idx].status='Em execução'; delete lista[idx].pendenciaMotivo; salvar(lista); renderTudo(); });
+                    tdA.appendChild(btCont);
+                    tr.appendChild(tdA);
+                    corpo.appendChild(tr); add++;
+                });
+                if(add===0){ var tr=document.createElement('tr'); var td=document.createElement('td'); td.colSpan=5; td.textContent='Não há serviços pendentes.'; tr.appendChild(td); corpo.appendChild(tr);}            }
+
+            function renderTudo(){ renderNovos(); renderExecucao(); renderPendentes(); }
+            renderTudo();
+            window.addEventListener('storage', renderTudo);
         })();
     </script>
 </body>
