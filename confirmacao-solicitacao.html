@@ -27,6 +27,7 @@
                 numero: gerarNumero(),
                 data: new Date().toLocaleDateString('pt-BR'),
                 origem: (p.get('origem')||'cliente'),
+                cliente: clienteEmail,
                 tipo: p.get('tipo-servico') || 'Serviço',
                 servico: p.get('servico') || '—',
                 precoBase: p.get('preco') || '0.00',
