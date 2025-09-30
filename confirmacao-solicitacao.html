@@ -12,6 +12,7 @@
             <h2>Solicitação Confirmada</h2>
             <p><strong>Número de solicitação:</strong> <span id="num"></span></p>
             <p><strong>Prestador:</strong> <span id="prestador-label">Aguardando aceitação do prestador</span></p>
+            <p><strong>Status:</strong> <span id="status-label">Aguardando aceitação do Prestador</span></p>
             <a href="lista-solicitacoes.html" class="btn">Ir para sua lista de solicitações</a>
         </div>
     </div>
@@ -66,6 +67,10 @@
             var spanPrest = document.getElementById('prestador-label');
             if(prest){ spanPrest.textContent = prest; }
             else { spanPrest.textContent = 'Aguardando aceitação do prestador'; }
+
+            var statusEl = document.getElementById('status-label');
+            var st = (registro.status||'').trim() || 'Aguardando aceitação do Prestador';
+            statusEl.textContent = st;
         })();
     </script>
 </body>
