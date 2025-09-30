@@ -24,10 +24,20 @@
             var registro = {
                 numero: gerarNumero(),
                 data: new Date().toLocaleDateString('pt-BR'),
+                origem: (p.get('origem')||'cliente'),
                 tipo: p.get('tipo-servico') || 'Serviço',
                 servico: p.get('servico') || '—',
+                precoBase: p.get('preco') || '0.00',
+                credito: p.get('credito') || '0.00',
+                taxa: p.get('taxa') || '0.00',
+                cupom: p.get('cupom') || '',
+                pagamento: p.get('pagamento') || '',
+                dataDesejada: p.get('data') || '',
+                hora: p.get('hora') || '',
+                endereco: p.get('endereco') || '',
+                observacoes: p.get('obs') || '',
                 total: p.get('total') || '0.00',
-                status: 'Aguardando início'
+                status: 'Aguardando aceitação do Prestador'
             };
             try{
                 var lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
