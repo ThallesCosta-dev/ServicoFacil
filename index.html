@@ -74,6 +74,17 @@
         formCliente.addEventListener('submit', function(){
             var email = (document.getElementById('email').value||'').trim();
             try{ localStorage.setItem('emailCliente', email); }catch(e){}
+            try{
+                var lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
+                var encontrado = null;
+                for(var i=0;i<lista.length;i++){
+                    var it = lista[i];
+                    if((it.cliente||'')===email && (it.status==='Aceito pelo Prestador' || it.status==='Em execução')){ encontrado = it; break; }
+                }
+                if(encontrado){
+                    this.action = 'confirmacao-solicitacao.html?numero=' + encodeURIComponent(encontrado.numero);
+                }
+            }catch(e){}
         });
 
         // salvar email do prestador para uso no painel
