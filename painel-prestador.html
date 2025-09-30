@@ -109,7 +109,10 @@
                     aceitar.className = 'btn btn-sm';
                     aceitar.textContent = 'Aceitar';
                     aceitar.addEventListener('click', function(){
+                        var emailPrest = '';
+                        try{ emailPrest = localStorage.getItem('emailPrestador') || ''; }catch(e){}
                         lista[idx].status = 'Aceito pelo Prestador';
+                        if(emailPrest){ lista[idx].prestadorAceito = emailPrest; }
                         try{ localStorage.setItem('solicitacoes', JSON.stringify(lista)); }catch(e){}
                         carregarLista();
                     });
