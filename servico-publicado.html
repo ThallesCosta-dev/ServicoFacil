@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serviço Publicado - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header-cliente">
+            <span id="header-prest">Prestador: jorge@ymail.com | <a href="painel-prestador.html">Voltar ao Painel</a></span>
+        </header>
+        <div class="card text-center">
+            <h2>Serviço publicado</h2>
+            <p>Seu serviço foi publicado com sucesso e agora pode ser encontrado pelos clientes.</p>
+            <div id="resumo" class="text-center"></div>
+            <div class="links-cadastro">
+                <a class="btn" href="painel-prestador.html">Ir para o Painel do Prestador</a>
+                <a class="btn" href="oferecer-servico.html" style="margin-top:10px">Oferecer outro serviço</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function(){
+            try{
+                var email = localStorage.getItem('emailPrestador');
+                if(email){
+                    var hp = document.getElementById('header-prest');
+                    hp.innerHTML = 'Prestador: ' + email + ' | <a href="painel-prestador.html">Voltar ao Painel</a>';
+                }
+            }catch(e){}
+
+            var p = new URLSearchParams(location.search);
+            var dados = {
+                categoria: p.get('categoria') || '—',
+                servico: p.get('descricao') || '—',
+                preco: p.get('preco') || '0.00',
+                cidade: p.get('cidade') || '—',
+                criadoEm: new Date().toISOString()
+            };
+
+            // Persistir oferta para uso futuro (ex.: listagem no painel)
+            try{
+                var ofertas = JSON.parse(localStorage.getItem('ofertasPrestador')||'[]');
+                ofertas.unshift(dados);
+                localStorage.setItem('ofertasPrestador', JSON.stringify(ofertas));
+            }catch(e){ /* sem bloqueio da UX */ }
+
+            var resumo = document.getElementById('resumo');
+            var precoBRL = (function(v){
+                var n = Number(v);
+                if(!isFinite(n)) return 'R$ 0,00';
+                return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            })(dados.preco);
+            resumo.innerHTML = '<p><strong>Categoria:</strong> ' + dados.categoria + '</p>'+
+                               '<p><strong>Serviço:</strong> ' + dados.servico + '</p>'+
+                               '<p><strong>Preço base:</strong> ' + precoBRL + '</p>'+
+                               '<p><strong>Cidade/Região:</strong> ' + dados.cidade + '</p>';
+        })();
+    </script>
+</body>
+</html>
