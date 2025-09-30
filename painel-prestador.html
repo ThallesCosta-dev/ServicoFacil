@@ -42,6 +42,80 @@
                     header.innerHTML = 'Prestador: ' + email + ' | <a href="index.html#prestador">Sair</a>';
                 }
             }catch(e){}
+
+            function carregarLista(){
+                var corpo = document.getElementById('lista-prestador');
+                if(!corpo) return;
+                corpo.innerHTML = '';
+                var lista;
+                try{ lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]'); }
+                catch(e){ lista = []; }
+
+                function ehPendente(st){
+                    var s = (st||'').toLowerCase();
+                    return s === '' || s.indexOf('aguardando') === 0;
+                }
+
+                lista.forEach(function(it, idx){
+                    var origem = (it.origem||'cliente').toLowerCase();
+                    var st = it.status || '';
+                    if(origem !== 'cliente') return;
+                    if(!ehPendente(st)) return; // mostra apenas aguardando decisão/início
+
+                    var tr = document.createElement('tr');
+                    var tdNum = document.createElement('td');
+                    var tdData = document.createElement('td');
+                    var tdServ = document.createElement('td');
+                    var tdValor = document.createElement('td');
+                    var tdDia = document.createElement('td');
+                    var tdEnd = document.createElement('td');
+                    var tdObs = document.createElement('td');
+                    var tdAcoes = document.createElement('td');
+
+                    tdNum.textContent = it.numero || '—';
+                    tdData.textContent = it.data || '—';
+                    tdServ.textContent = (it.tipo||'') + ' - ' + (it.servico||'');
+                    var total = Number(it.total||0);
+                    tdValor.textContent = isFinite(total) ? total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'R$ 0,00';
+                    var dataHora = (it.dataDesejada||it.data||'') + (it.hora? (' ' + it.hora):'');
+                    tdDia.textContent = dataHora || '—';
+                    tdEnd.textContent = it.endereco || '—';
+                    tdObs.textContent = it.observacoes || it.obs || '—';
+
+                    var aceitar = document.createElement('button');
+                    aceitar.className = 'btn btn-sm';
+                    aceitar.textContent = 'Aceitar';
+                    aceitar.addEventListener('click', function(){
+                        lista[idx].status = 'Aceito pelo Prestador';
+                        try{ localStorage.setItem('solicitacoes', JSON.stringify(lista)); }catch(e){}
+                        carregarLista();
+                    });
+                    var rejeitar = document.createElement('button');
+                    rejeitar.className = 'btn btn-sm btn-warning';
+                    rejeitar.textContent = 'Rejeitar';
+                    rejeitar.addEventListener('click', function(){
+                        lista[idx].status = 'Rejeitado pelo Prestador';
+                        try{ localStorage.setItem('solicitacoes', JSON.stringify(lista)); }catch(e){}
+                        carregarLista();
+                    });
+
+                    tdAcoes.appendChild(aceitar);
+                    var sep = document.createTextNode(' ');
+                    tdAcoes.appendChild(sep);
+                    tdAcoes.appendChild(rejeitar);
+
+                    tr.appendChild(tdNum);
+                    tr.appendChild(tdData);
+                    tr.appendChild(tdServ);
+                    tr.appendChild(tdValor);
+                    tr.appendChild(tdDia);
+                    tr.appendChild(tdEnd);
+                    tr.appendChild(tdObs);
+                    tr.appendChild(tdAcoes);
+                    corpo.appendChild(tr);
+                });
+            }
+            carregarLista();
         })();
     </script>
 </body>
