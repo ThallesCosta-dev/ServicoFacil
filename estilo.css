@@ -70,6 +70,7 @@ h1, h2, h3 {
     margin-top: 10px;
     color: #0056b3;
 }
+.links-cadastro .btn + .btn { margin-top: 10px; }
 .header-cliente {
     text-align: right;
     margin-bottom: 20px;
