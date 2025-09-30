@@ -1,0 +1,13 @@
+Serviço Fácil — LEIAME (README)
+
+Equipe:
+- Thalles Ferreira Costa
+- LAIS BATISTA TORRES DE SOUZA
+- PEDRO HERINGER VALERIO DE SOUZA
+- ISABELA VIEIRA DOS SANTOS CARNEIRO
+- Raul de Souza Fiel Faria
+
+
+Observações:
+- Como se trata de um protótipo estático, não há persistência de dados (sem backend)
+- Mensagens de confirmação simulam o comportamento de um sistema real

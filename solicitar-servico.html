@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitar Serviço - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header-cliente">
+            <span id="header-email">Cliente: mbelo.br@gmail.com | <a href="index.html">Sair</a></span>
+        </header>
+        <h1>Escolha o serviço desejado</h1>
+        <div class="card">
+            <form id="form-solicitacao" action="confirmar-preco.html" method="get">
+                <input type="hidden" name="origem" value="cliente">
+                <div class="form-group">
+                    <label for="tipo-servico">Tipo de Serviço:</label>
+                    <select id="tipo-servico" name="tipo-servico">
+                        <option value="bombeiro">Bombeiro Hidráulico</option>
+                        <option value="eletricista">Eletricista</option>
+                        <option value="chaveiro">Chaveiro</option>
+                        <option value="marceneiro">Marceneiro</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Serviços disponíveis:</label>
+                    <div id="lista-servicos" class="lista-servicos">
+                    </div>
+                </div>
+                <button type="submit" class="btn">Escolher</button>
+            </form>
+             <div class="links-cadastro">
+                <a href="lista-solicitacoes.html">Voltar para Minhas Solicitações</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        try{
+            var email = localStorage.getItem('emailCliente');
+            if(email){
+                var header = document.getElementById('header-email');
+                header.innerHTML = 'Cliente: ' + email + ' | <a href="index.html">Sair</a>';
+            }
+        }catch(e){}
+
+        const categoriasParaServicos = {
+            bombeiro: [
+                'Vazamento em Torneira',
+                'Vazamento em Descarga',
+                'Vazamento no teto',
+                'Instalação de torneira',
+                'Desentupimento de pia'
+            ],
+            eletricista: [
+                'Troca de tomada/interruptor',
+                'Instalação de luminária',
+                'Curto-circuito em circuito',
+                'Disjuntor desarmando',
+                'Passagem de fiação'
+            ],
+            chaveiro: [
+                'Abertura de porta residencial',
+                'Confecção de chave comum',
+                'Troca de miolo/fechadura',
+                'Abertura de porta de carro',
+                'Instalação de fechadura digital'
+            ],
+            marceneiro: [
+                'Conserto de porta/empeno',
+                'Montagem de móvel',
+                'Ajuste de dobradiça/corrediça',
+                'Fabricação de prateleiras',
+                'Instalação de rodapé'
+            ]
+        };
+
+        const selectCategoria = document.getElementById('tipo-servico');
+        const listaServicosDiv = document.getElementById('lista-servicos');
+
+        function nomeDaCategoria(valor){
+            const map = {bombeiro:'Bombeiro Hidráulico', eletricista:'Eletricista', chaveiro:'Chaveiro', marceneiro:'Marceneiro'};
+            return map[valor] || valor;
+        }
+
+        function renderizarServicos(categoria) {
+            const servicos = categoriasParaServicos[categoria] || [];
+            listaServicosDiv.innerHTML = '';
+
+            servicos.forEach((servico, index) => {
+                const id = `servico_${categoria}_${index}`;
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'servico';
+                input.value = servico;
+                input.id = id;
+                if (index === 0) input.checked = true;
+
+                const label = document.createElement('label');
+                label.setAttribute('for', id);
+                label.textContent = ' ' + servico;
+
+                listaServicosDiv.appendChild(input);
+                listaServicosDiv.appendChild(label);
+                listaServicosDiv.appendChild(document.createElement('br'));
+            });
+        }
+
+        renderizarServicos(selectCategoria.value);
+        selectCategoria.addEventListener('change', function() {
+            renderizarServicos(this.value);
+        });
+
+        document.getElementById('form-solicitacao').addEventListener('submit', function(e){
+            const categoriaValor = selectCategoria.value;
+            const categoriaNome = nomeDaCategoria(categoriaValor);
+            const servicoSelecionado = document.querySelector('input[name="servico"]:checked')?.value || '';
+            const params = new URLSearchParams(new FormData(this));
+            params.set('tipo-servico', categoriaNome);
+            params.set('servico', servicoSelecionado);
+            this.action = 'confirmar-preco.html?' + params.toString();
+        });
+    })();
+    </script>
+</body>
+</html>

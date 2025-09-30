@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+    <style>
+        .hidden{display:none}
+        .tabs{display:flex;gap:12px;margin-bottom:12px}
+        .tabs a{font-weight:bold;text-decoration:none}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Serviço Fácil</h1>
+        <div class="card">
+            <div class="tabs">
+                <a href="#cliente" id="tab-cliente">Cliente</a>
+                <a href="#prestador" id="tab-prestador">Prestador</a>
+            </div>
+            <div id="login-cliente">
+                <h2>Login</h2>
+                <form action="lista-solicitacoes.html" id="form-login-cliente">
+                    <div class="form-group">
+                        <label for="email">E-mail:</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="senha">Senha:</label>
+                        <input type="password" id="senha" name="senha" required>
+                    </div>
+                    <button type="submit" class="btn">Entrar</button>
+                </form>
+                <div class="links-cadastro">
+                    <a href="cadastro.html?tipo=cliente">Quero ser cliente do Serviço Fácil</a>
+                    <a href="cadastro.html?tipo=prestador">Sou profissional e quero me candidatar a prestar Serviços</a>
+                </div>
+            </div>
+
+            <div id="login-prestador" class="hidden">
+                <h2>Login do Prestador</h2>
+                <form action="painel-prestador.html" method="get" id="form-login-prestador">
+                    <div class="form-group">
+                        <label for="email-prest">E-mail:</label>
+                        <input type="email" id="email-prest" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="senha-prest">Senha:</label>
+                        <input type="password" id="senha-prest" name="senha" required>
+                    </div>
+                    <button type="submit" class="btn">Entrar</button>
+                </form>
+                <div class="links-cadastro">
+                    <a href="cadastro.html?tipo=prestador">Não tenho conta — Quero me cadastrar como prestador</a>
+                    <a href="#cliente">Sou cliente</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function aplicarHash(){
+            var hash = (location.hash || '#cliente').toLowerCase();
+            var ehPrestador = hash === '#prestador';
+            document.getElementById('login-cliente').classList.toggle('hidden', ehPrestador);
+            document.getElementById('login-prestador').classList.toggle('hidden', !ehPrestador);
+        }
+        window.addEventListener('hashchange', aplicarHash);
+        aplicarHash();
+
+        // salvar email do cliente para uso na lista de solicitações
+        var formCliente = document.getElementById('form-login-cliente');
+        formCliente.addEventListener('submit', function(){
+            var email = (document.getElementById('email').value||'').trim();
+            try{ localStorage.setItem('emailCliente', email); }catch(e){}
+        });
+
+        // salvar email do prestador para uso no painel
+        var formPrest = document.getElementById('form-login-prestador');
+        formPrest.addEventListener('submit', function(){
+            var email = (document.getElementById('email-prest').value||'').trim();
+            try{ localStorage.setItem('emailPrestador', email); }catch(e){}
+        });
+    </script>
+</body>
+</html>

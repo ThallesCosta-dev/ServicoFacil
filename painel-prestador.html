@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel do Prestador - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container-full">
+        <header class="header-cliente">
+            <span id="header-prestador">Prestador: jorge@ymail.com | <a href="index.html#prestador">Sair</a></span>
+        </header>
+
+        <h1>Painel do Prestador</h1>
+
+        <div class="card">
+            <h3>Ações rápidas</h3>
+            <div class="links-cadastro">
+                <a href="oferecer-servico.html">Oferecer um novo serviço</a>
+                <a href="confirmar-preco.html?origem=prestador&tipo-servico=Bombeiro%20Hidráulico&servico=Vazamento%20em%20Descarga">Confirmar preço de solicitações</a>
+                <a href="cadastro.html?tipo=prestador">Editar meu cadastro</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Novo serviço solicitado:</h3>
+            <div class="servico-item">
+                <p><strong>Cliente:</strong> mbele.br@gmail.com</p>
+                <p><strong>Tipo de Serviço:</strong> Bombeiro Hidráulico</p>
+                <p><strong>Serviço:</strong> Vazamento em Descarga</p>
+                <button class="btn btn-sm" onclick="location.href='confirmar-preco.html?origem=prestador&tipo-servico=Bombeiro%20Hidráulico&servico=Vazamento%20em%20Descarga'">Iniciar</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Serviço em execução:</h3>
+             <div class="servico-item">
+                <p><strong>Número:</strong> 8743462</p>
+                <p><strong>Serviço:</strong> Gasista - Conserto de vazamento</p>
+                <p><strong>Cliente:</strong> francisco@ymail.com</p>
+                <button class="btn btn-sm btn-warning">Colocar Pendente</button>
+                <button class="btn btn-sm">Concluir</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Serviços Pendentes:</h3>
+            <table class="tabela-solicitacoes">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Data</th>
+                        <th>Serviço</th>
+                        <th>Cliente/Motivo</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>8727362</td>
+                        <td>01/03/2017</td>
+                        <td>Bombeiro Hidráulico - Vazamento em descarga</td>
+                        <td>ana@yahoo.com.br<br><small>Aguardando comprar cano</small></td>
+                        <td><button class="btn-link" disabled>Continuar</button></td>
+                    </tr>
+                    <tr>
+                        <td>8273028</td>
+                        <td>20/01/2017</td>
+                        <td>Eletricista - Interruptor não funciona</td>
+                        <td>claudio@hotmail.com<br><small>Aguardando comprar interruptor</small></td>
+                        <td><button class="btn-link" disabled>Continuar</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script>
+        (function(){
+            try{
+                var email = localStorage.getItem('emailPrestador');
+                if(email){
+                    var header = document.getElementById('header-prestador');
+                    header.innerHTML = 'Prestador: ' + email + ' | <a href="index.html#prestador">Sair</a>';
+                }
+            }catch(e){}
+        })();
+    </script>
+</body>
+</html>

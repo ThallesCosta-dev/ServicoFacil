@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solicitação Confirmada - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container">
+        <div class="card text-center">
+            <h2>Solicitação Confirmada</h2>
+            <p><strong>Número de solicitação:</strong> <span id="num"></span></p>
+            <p><strong>Prestador:</strong> artur@gmail.com</p>
+            <a href="lista-solicitacoes.html" class="btn">Ir para sua lista de solicitações</a>
+        </div>
+    </div>
+    <script>
+        (function(){
+            function gerarNumero(){
+                return String(Date.now()).slice(-7);
+            }
+            var p = new URLSearchParams(location.search);
+            var registro = {
+                numero: gerarNumero(),
+                data: new Date().toLocaleDateString('pt-BR'),
+                tipo: p.get('tipo-servico') || 'Serviço',
+                servico: p.get('servico') || '—',
+                total: p.get('total') || '0.00',
+                status: 'Aguardando início'
+            };
+            try{
+                var lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
+                lista.unshift(registro);
+                localStorage.setItem('solicitacoes', JSON.stringify(lista));
+            }catch(e){
+                console.error('Erro ao salvar solicitação', e);
+            }
+            document.getElementById('num').textContent = registro.numero;
+        })();
+    </script>
+</body>
+</html>

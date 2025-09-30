@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container">
+        <h1 id="titulo-cadastro">Cadastro de Cliente</h1>
+        <div class="card">
+            <form action="confirmacao-cadastro.html">
+                <div class="form-group">
+                    <label for="email">E-mail:</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="senha">Senha:</label>
+                    <input type="password" id="senha" name="senha" required>
+                </div>
+                <div class="form-group">
+                    <label for="redigite">Redigite:</label>
+                    <input type="password" id="redigite" name="redigite" required>
+                </div>
+                <button type="submit" class="btn">Registrar</button>
+            </form>
+            <div class="links-cadastro">
+                <a href="index.html">Já tenho uma conta</a>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Script para alterar o título dinamicamente
+        document.addEventListener('DOMContentLoaded', function() {
+            const params = new URLSearchParams(window.location.search);
+            const tipo = params.get('tipo');
+            const titulo = document.getElementById('titulo-cadastro');
+            if (tipo === 'prestador') {
+                titulo.textContent = 'Cadastro de Prestador';
+            } else {
+                titulo.textContent = 'Cadastro de Cliente';
+            }
+        });
+    </script>
+</body>
+</html>

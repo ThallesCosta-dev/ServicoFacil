@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oferecer Serviço - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header-cliente">
+            <span id="header-prest">Prestador: jorge@ymail.com | <a href="painel-prestador.html">Voltar ao Painel</a></span>
+        </header>
+        <h1>Oferecer Serviço</h1>
+        <div class="card">
+            <form action="confirmacao-cadastro.html" method="get" id="form-oferecer">
+                <div class="form-group">
+                    <label for="categoria">Categoria (conforme solicitações do usuário):</label>
+                    <select id="categoria" name="categoria" required>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="descricao">Serviço (solicitado pelo usuário):</label>
+                    <select id="descricao" name="descricao" required>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="preco">Preço base (R$):</label>
+                    <input type="number" id="preco" name="preco" min="0" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="cidade">Cidade/Região de atendimento:</label>
+                    <input type="text" id="cidade" name="cidade" required>
+                </div>
+                <button class="btn" type="submit" id="btn-publicar">Publicar serviço</button>
+                <p id="aviso" style="margin-top:8px;color:#b94a48;display:none">Não há solicitações do usuário para definir serviços ofertáveis.</p>
+            </form>
+        </div>
+    </div>
+    <script>
+        (function(){
+            try{
+                var email = localStorage.getItem('emailPrestador');
+                if(email){
+                    var hp = document.getElementById('header-prest');
+                    hp.innerHTML = 'Prestador: ' + email + ' | <a href="painel-prestador.html">Voltar ao Painel</a>';
+                }
+            }catch(e){}
+
+            function carregarMapa(){
+                try{
+                    var lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
+                    var mapa = {};
+                    lista.forEach(function(it){
+                        var tipo = it.tipo || '';
+                        var serv = it.servico || '';
+                        if(!tipo || !serv) return;
+                        if(!mapa[tipo]) mapa[tipo] = new Set();
+                        mapa[tipo].add(serv);
+                    });
+                    return mapa;
+                }catch(e){ return {}; }
+            }
+
+            var selectCat = document.getElementById('categoria');
+            var selectServ = document.getElementById('descricao');
+            var btn = document.getElementById('btn-publicar');
+            var aviso = document.getElementById('aviso');
+
+            var mapa = carregarMapa();
+            var categorias = Object.keys(mapa);
+
+            function preencherCategorias(){
+                selectCat.innerHTML = '';
+                categorias.forEach(function(c){
+                    var opt = document.createElement('option');
+                    opt.value = c;
+                    opt.textContent = c;
+                    selectCat.appendChild(opt);
+                });
+            }
+            function preencherServicos(){
+                selectServ.innerHTML = '';
+                var cat = selectCat.value;
+                var servs = Array.from(mapa[cat] || []);
+                servs.forEach(function(s){
+                    var opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    selectServ.appendChild(opt);
+                });
+                var tem = servs.length > 0;
+                selectServ.required = tem;
+                btn.disabled = !tem;
+            }
+
+            if(categorias.length === 0){
+                aviso.style.display = 'block';
+                btn.disabled = true;
+                selectCat.disabled = true;
+                selectServ.disabled = true;
+            } else {
+                preencherCategorias();
+                preencherServicos();
+                selectCat.addEventListener('change', preencherServicos);
+            }
+        })();
+    </script>
+</body>
+</html> 

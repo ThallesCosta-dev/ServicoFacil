@@ -1,0 +1,103 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 600px;
+    margin: auto;
+}
+.container-full {
+    max-width: 900px;
+    margin: auto;
+}
+.card {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+h1, h2, h3 {
+    color: #0056b3;
+}
+.text-center { text-align: center; }
+.form-group { margin-bottom: 15px; }
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+.form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+.btn {
+    display: inline-block;
+    background-color: #0056b3;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    width: 100%;
+}
+.btn:hover { background-color: #004494; }
+.btn-sm { padding: 5px 10px; font-size: 0.9em; width: auto; }
+.btn-warning { background-color: #f0ad4e; }
+.btn-warning:hover { background-color: #ec971f; }
+.btn-link {
+    background: none;
+    border: none;
+    color: #0056b3;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 0;
+}
+.btn-link:disabled { color: #888; cursor: not-allowed; }
+.links-cadastro {
+    margin-top: 20px;
+    text-align: center;
+}
+.links-cadastro a {
+    display: block;
+    margin-top: 10px;
+    color: #0056b3;
+}
+.header-cliente {
+    text-align: right;
+    margin-bottom: 20px;
+    font-size: 0.9em;
+}
+.header-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.header-actions .btn { width: auto; }
+.tabela-solicitacoes {
+    width: 100%;
+    border-collapse: collapse;
+}
+.tabela-solicitacoes th, .tabela-solicitacoes td {
+    text-align: left;
+    padding: 8px;
+    border-bottom: 1px solid #ddd;
+}
+.tabela-solicitacoes th { font-weight: bold; }
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+.rating span {
+    font-size: 24px;
+    cursor: pointer;
+    margin: 0 5px;
+}

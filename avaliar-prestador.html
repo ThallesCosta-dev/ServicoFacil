@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avaliar Prestador - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Avalie seu prestador</h1>
+        <div class="card">
+            <div class="info-servico">
+                <p><strong>Número:</strong> <span id="numero"></span></p>
+                <p><strong>Tipo de Serviço:</strong> Bombeiro Hidráulico</p>
+                <p><strong>Serviço:</strong> Vazamento em Descarga</p>
+                <p><strong>Data:</strong> 02/01/2017</p>
+                <p><strong>Data da Conclusão:</strong> 05/01/2017</p>
+                <p><strong>Prestador:</strong> jose@hotmail.com</p>
+            </div>
+            <form id="form-avaliacao">
+                <div class="form-group">
+                    <label for="nota">Nota:</label>
+                    <div class="rating" id="rating">
+                        <label><input type="radio" name="nota" value="1"> 1</label>
+                        <label><input type="radio" name="nota" value="2"> 2</label>
+                        <label><input type="radio" name="nota" value="3"> 3</label>
+                        <label><input type="radio" name="nota" value="4"> 4</label>
+                        <label><input type="radio" name="nota" value="5" checked> 5</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comentario">Comentário (opcional):</label>
+                    <textarea id="comentario" name="comentario" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn">Registrar Avaliação</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        (function(){
+            var p = new URLSearchParams(location.search);
+            var numero = p.get('numero') || '';
+            document.getElementById('numero').textContent = numero;
+
+            document.getElementById('form-avaliacao').addEventListener('submit', function(e){
+                e.preventDefault();
+                var dados = new FormData(this);
+                var nota = dados.get('nota') || '5';
+                var comentario = (dados.get('comentario')||'').trim();
+                try{
+                    var avs = JSON.parse(localStorage.getItem('avaliacoes')||'{}');
+                    avs[numero] = { nota: nota, comentario: comentario, data: new Date().toISOString() };
+                    localStorage.setItem('avaliacoes', JSON.stringify(avs));
+                }catch(e){ console.error('Falha ao salvar avaliação', e); }
+                location.href = 'lista-solicitacoes.html';
+            });
+        })();
+    </script>
+</body>
+</html>

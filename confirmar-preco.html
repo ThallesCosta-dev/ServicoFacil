@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmar Preço - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+    <style>
+        .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+        .total{font-size:18px;font-weight:bold}
+        .inline{display:inline-block}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Confirme o Preço do Serviço</h1>
+        <div class="card">
+            <form action="confirmacao-solicitacao.html" method="get">
+                <div class="info-preco">
+                    <p><strong>Tipo de Serviço:</strong> <span id="tipo-texto">Bombeiro Hidráulico</span></p>
+                    <p><strong>Serviço:</strong> <span id="servico-view" class="inline"></span><input id="servico-edit" class="inline" type="text" name="servico" style="display:none"></p>
+                </div>
+
+                <input type="hidden" id="origem" name="origem" value="cliente">
+                <input type="hidden" id="tipo-hidden" name="tipo-servico" value="Bombeiro Hidráulico">
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="preco-base">Preço base (R$)</label>
+                        <input type="number" id="preco-base" name="preco" min="0" step="0.01" value="200.00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="credito">Seu crédito (R$)</label>
+                        <input type="number" id="credito" name="credito" min="0" step="0.01" value="10.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="taxa">Taxa de deslocamento (R$)</label>
+                        <input type="number" id="taxa" name="taxa" min="0" step="0.01" value="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="cupom">Cupom de desconto</label>
+                        <input type="text" id="cupom" name="cupom" placeholder="Ex.: BEMVINDO10">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="pagamento">Forma de pagamento</label>
+                    <select id="pagamento" name="pagamento" required>
+                        <option value="pix">Pix</option>
+                        <option value="cartao">Cartão de crédito</option>
+                        <option value="debito">Cartão de débito</option>
+                        <option value="dinheiro">Dinheiro na entrega</option>
+                    </select>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label for="data">Data desejada</label>
+                        <input type="date" id="data" name="data" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="hora">Horário</label>
+                        <input type="time" id="hora" name="hora" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="endereco">Endereço de atendimento</label>
+                    <input type="text" id="endereco" name="endereco" placeholder="Rua, número, bairro, cidade" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="obs">Observações</label>
+                    <textarea id="obs" name="obs" rows="3" placeholder="Detalhes importantes, acesso ao local, preferências..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <p class="total" id="label-total">Valor a ser cobrado: R$ 190,00</p>
+                    <input type="hidden" id="total" name="total" value="190.00">
+                </div>
+
+                <button type="submit" class="btn">Confirmar</button>
+                <div class="links-cadastro">
+                    <a href="solicitar-servico.html">Cancelar e escolher outro serviço</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var precoBase = document.getElementById('preco-base');
+        var credito = document.getElementById('credito');
+        var taxa = document.getElementById('taxa');
+        var cupom = document.getElementById('cupom');
+        var totalInput = document.getElementById('total');
+        var labelTotal = document.getElementById('label-total');
+        var tipoTexto = document.getElementById('tipo-texto');
+        var servicoView = document.getElementById('servico-view');
+        var servicoEdit = document.getElementById('servico-edit');
+        var origemInput = document.getElementById('origem');
+        var tipoHidden = document.getElementById('tipo-hidden');
+
+        function normalizar(v){
+            return Math.max(0, Number(v||0));
+        }
+        function descontoCupom(valor, codigo){
+            var c = (codigo||'').trim().toUpperCase();
+            if(!c) return 0;
+            if(c === 'BEMVINDO10') return Math.min(valor*0.10, 50);
+            if(c === 'FRETEGRATIS') return Math.min(20, valor);
+            return 0;
+        }
+        function recalcular(){
+            var base = normalizar(precoBase.value);
+            var cred = normalizar(credito.value);
+            var desloc = normalizar(taxa.value);
+            var desc = descontoCupom(base, cupom.value);
+            var total = Math.max(0, base + desloc - cred - desc);
+            totalInput.value = total.toFixed(2);
+            labelTotal.textContent = 'Valor a ser cobrado: R$ ' + total.toFixed(2).replace('.', ',');
+        }
+        [precoBase, credito, taxa, cupom].forEach(function(el){
+            el.addEventListener('input', recalcular);
+            el.addEventListener('change', recalcular);
+        });
+        recalcular();
+
+        function aplicarParametros(){
+            var p = new URLSearchParams(location.search);
+            var origem = (p.get('origem')||'cliente').toLowerCase();
+            var tipo = p.get('tipo-servico') || 'Bombeiro Hidráulico';
+            var servico = p.get('servico') || 'Vazamento em Descarga';
+
+            origemInput.value = origem;
+            tipoHidden.value = tipo;
+            tipoTexto.textContent = tipo;
+
+            if(origem === 'prestador'){
+                servicoEdit.style.display = 'inline-block';
+                servicoView.style.display = 'none';
+                servicoEdit.value = servico;
+            } else {
+                servicoEdit.style.display = 'none';
+                servicoView.style.display = 'inline-block';
+                servicoView.textContent = servico;
+                var hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'servico';
+                hidden.value = servico;
+                document.forms[0].appendChild(hidden);
+            }
+        }
+        aplicarParametros();
+    </script>
+</body>
+</html>

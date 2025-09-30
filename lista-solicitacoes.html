@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Solicitações - Serviço Fácil</title>
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="container-full">
+        <header class="header-cliente">
+            <span id="header-email">Cliente: mbelo.br@gmail.com | Crédito: R$ 10,00 | <a href="index.html">Sair</a></span>
+        </header>
+        
+        <div class="header-actions">
+            <h1>Minha lista de solicitações</h1>
+            <a href="solicitar-servico.html" class="btn">Criar nova solicitação</a>
+        </div>
+
+        <div class="card">
+            <table class="tabela-solicitacoes">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Data</th>
+                        <th>Serviço</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-dinamica">
+                </tbody>
+                <tbody id="historico">
+                    <tr>
+                        <td>5902938</td>
+                        <td>01/03/2017</td>
+                        <td>Bombeiro Hidráulico - Vazamento em descarga</td>
+                        <td>Aguardando início</td>
+                        <td><button class="btn-link">Cancelar</button></td>
+                    </tr>
+                    <tr>
+                        <td>8273028</td>
+                        <td>20/01/2017</td>
+                        <td>Carpintaria - Reparo em armário</td>
+                        <td>Em execução</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>8273028</td>
+                        <td>20/01/2017</td>
+                        <td>Eletricista - Interruptor não funciona</td>
+                        <td>Pendente ℹ️</td>
+                        <td></td>
+                    </tr>
+                     <tr>
+                        <td>9139482</td>
+                        <td>30/10/2016</td>
+                        <td>Chaveiro - Abrir porta por perda chave</td>
+                        <td>Concluída</td>
+                        <td><a href="avaliar-prestador.html?numero=9139482" class="btn-link">Avaliar Prestador</a></td>
+                    </tr>
+                    <tr>
+                        <td>7629382</td>
+                        <td>13/09/2015</td>
+                        <td>Bombeiro Hidráulico - Vazamento no teto</td>
+                        <td>Cancelado pelo Cliente</td>
+                        <td></td>
+                    </tr>
+                     <tr>
+                        <td>3206113</td>
+                        <td>07/08/2015</td>
+                        <td>Bombeiro Hidráulico - Vazamento no teto</td>
+                        <td>Concluído em 19/08/2015<br><small>Avaliado: 5/5</small></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>1083755</td>
+                        <td>06/08/2015</td>
+                        <td>Bombeiro Hidráulico - Vazamento no teto</td>
+                        <td>Cancelado pelo Prestador</td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+             <div class="pagination">
+                <span>Página 1 de 4</span>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function(){
+            // aplica email do login
+            try{
+                var email = localStorage.getItem('emailCliente');
+                if(email){
+                    var header = document.getElementById('header-email');
+                    header.innerHTML = 'Cliente: ' + email + ' | Crédito: R$ 10,00 | <a href="index.html">Sair</a>';
+                }
+            }catch(e){}
+
+            function carregar(){
+                var corpo = document.getElementById('lista-dinamica');
+                corpo.innerHTML = '';
+                try{
+                    var lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
+                    lista.forEach(function(it, idx){
+                        var tr = document.createElement('tr');
+                        var tdNum = document.createElement('td');
+                        var tdData = document.createElement('td');
+                        var tdServ = document.createElement('td');
+                        var tdStatus = document.createElement('td');
+                        var tdAcoes = document.createElement('td');
+                        tdNum.textContent = it.numero;
+                        tdData.textContent = it.data;
+                        tdServ.textContent = (it.tipo||'') + ' - ' + (it.servico||'');
+                        tdStatus.textContent = it.status || 'Aguardando início';
+                        if ((it.status||'') !== 'Cancelado pelo Cliente'){
+                            var cancelar = document.createElement('button');
+                            cancelar.className = 'btn-link';
+                            cancelar.textContent = 'Cancelar';
+                            cancelar.addEventListener('click', function(){
+                                lista[idx].status = 'Cancelado pelo Cliente';
+                                localStorage.setItem('solicitacoes', JSON.stringify(lista));
+                                carregar();
+                                aplicarAvaliacoes();
+                            });
+                            tdAcoes.appendChild(cancelar);
+                        }
+                        tr.appendChild(tdNum);
+                        tr.appendChild(tdData);
+                        tr.appendChild(tdServ);
+                        tr.appendChild(tdStatus);
+                        tr.appendChild(tdAcoes);
+                        corpo.appendChild(tr);
+                    });
+                }catch(e){ console.error('Falha ao carregar lista', e); }
+            }
+
+            function aplicarAvaliacoes(){
+                try{
+                    var avs = JSON.parse(localStorage.getItem('avaliacoes')||'{}');
+                    var linhas = document.querySelectorAll('table.tabela-solicitacoes tbody tr');
+                    linhas.forEach(function(tr){
+                        var numero = (tr.cells[0] && tr.cells[0].textContent||'').trim();
+                        if(avs[numero]){
+                            var nota = avs[numero].nota;
+                            tr.cells[3].innerHTML = 'Concluída<br><small>Avaliado: ' + nota + '/5</small>';
+                            var acoes = tr.cells[4];
+                            if (acoes){ acoes.innerHTML = ''; }
+                        }
+                    });
+                }catch(e){ console.error('Falha ao aplicar avaliações', e); }
+            }
+
+            carregar();
+            aplicarAvaliacoes();
+
+            // habilitar cancelamento para a linha estática 5902938
+            var historico = document.getElementById('historico');
+            var linhas = historico.querySelectorAll('tr');
+            linhas.forEach(function(tr){
+                var numero = (tr.cells[0] && tr.cells[0].textContent||'').trim();
+                var botao = tr.querySelector('.btn-link');
+                if (numero === '5902938' && botao){
+                    botao.addEventListener('click', function(){
+                        tr.cells[3].textContent = 'Cancelado pelo Cliente';
+                        botao.disabled = true;
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
