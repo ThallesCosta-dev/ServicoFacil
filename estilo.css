@@ -101,3 +101,4 @@ h1, h2, h3 {
     cursor: pointer;
     margin: 0 5px;
 }
+.aviso-sem-solicitacoes { margin-top: 8px; color: #b94a48; display: none; }
