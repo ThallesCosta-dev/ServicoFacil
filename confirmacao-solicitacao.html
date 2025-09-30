@@ -21,6 +21,8 @@
                 return String(Date.now()).slice(-7);
             }
             var p = new URLSearchParams(location.search);
+            var clienteEmail = '';
+            try{ clienteEmail = localStorage.getItem('emailCliente') || ''; }catch(e){}
             var registro = {
                 numero: gerarNumero(),
                 data: new Date().toLocaleDateString('pt-BR'),
