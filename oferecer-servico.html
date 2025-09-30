@@ -13,7 +13,7 @@
         </header>
         <h1>Oferecer Serviço</h1>
         <div class="card">
-            <form action="confirmacao-cadastro.html" method="get" id="form-oferecer">
+            <form action="servico-publicado.html" method="get" id="form-oferecer">
                 <div class="form-group">
                     <label for="categoria">Categoria (conforme solicitações do usuário):</label>
                     <select id="categoria" name="categoria" required>
@@ -33,7 +33,7 @@
                     <input type="text" id="cidade" name="cidade" required>
                 </div>
                 <button class="btn" type="submit" id="btn-publicar">Publicar serviço</button>
-                <p id="aviso" style="margin-top:8px;color:#b94a48;display:none">Não há solicitações do usuário para definir serviços ofertáveis.</p>
+                <p id="aviso" class="aviso-sem-solicitacoes">Não há solicitações do usuário para definir serviços ofertáveis.</p>
             </form>
         </div>
     </div>
@@ -107,4 +107,4 @@
         })();
     </script>
 </body>
-</html> 
+</html>

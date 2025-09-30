@@ -15,63 +15,43 @@
         <h1>Painel do Prestador</h1>
 
         <div class="card">
-            <h3>Ações rápidas</h3>
-            <div class="links-cadastro">
-                <a href="oferecer-servico.html">Oferecer um novo serviço</a>
-                <a href="confirmar-preco.html?origem=prestador&tipo-servico=Bombeiro%20Hidráulico&servico=Vazamento%20em%20Descarga">Confirmar preço de solicitações</a>
-                <a href="cadastro.html?tipo=prestador">Editar meu cadastro</a>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Novo serviço solicitado:</h3>
-            <div class="servico-item">
-                <p><strong>Cliente:</strong> mbele.br@gmail.com</p>
-                <p><strong>Tipo de Serviço:</strong> Bombeiro Hidráulico</p>
-                <p><strong>Serviço:</strong> Vazamento em Descarga</p>
-                <button class="btn btn-sm" onclick="location.href='confirmar-preco.html?origem=prestador&tipo-servico=Bombeiro%20Hidráulico&servico=Vazamento%20em%20Descarga'">Iniciar</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Serviço em execução:</h3>
-             <div class="servico-item">
-                <p><strong>Número:</strong> 8743462</p>
-                <p><strong>Serviço:</strong> Gasista - Conserto de vazamento</p>
-                <p><strong>Cliente:</strong> francisco@ymail.com</p>
-                <button class="btn btn-sm btn-warning">Colocar Pendente</button>
-                <button class="btn btn-sm">Concluir</button>
-            </div>
-        </div>
-
-        <div class="card">
-            <h3>Serviços Pendentes:</h3>
+            <h3>Novos serviços</h3>
             <table class="tabela-solicitacoes">
                 <thead>
                     <tr>
                         <th>Número</th>
                         <th>Data</th>
-                        <th>Serviço</th>
+                        <th>Cliente</th>
+                        <th>Tipo/Serviço</th>
+                        <th>Valor</th>
+                        <th>Dia e hora</th>
+                        <th>Endereço</th>
+                        <th>Observações</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lista-novos"></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Serviço em execução</h3>
+            <div id="execucao-conteudo"></div>
+        </div>
+
+        <div class="card">
+            <h3>Serviços Pendentes</h3>
+            <table class="tabela-solicitacoes">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Data</th>
+                        <th>Tipo/Serviço</th>
                         <th>Cliente/Motivo</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>8727362</td>
-                        <td>01/03/2017</td>
-                        <td>Bombeiro Hidráulico - Vazamento em descarga</td>
-                        <td>ana@yahoo.com.br<br><small>Aguardando comprar cano</small></td>
-                        <td><button class="btn-link" disabled>Continuar</button></td>
-                    </tr>
-                    <tr>
-                        <td>8273028</td>
-                        <td>20/01/2017</td>
-                        <td>Eletricista - Interruptor não funciona</td>
-                        <td>claudio@hotmail.com<br><small>Aguardando comprar interruptor</small></td>
-                        <td><button class="btn-link" disabled>Continuar</button></td>
-                    </tr>
-                </tbody>
+                <tbody id="lista-pendentes"></tbody>
             </table>
         </div>
     </div>
@@ -84,6 +64,202 @@
                     header.innerHTML = 'Prestador: ' + email + ' | <a href="index.html#prestador">Sair</a>';
                 }
             }catch(e){}
+
+            function carregarLista(){
+                var corpo = document.getElementById('lista-prestador');
+                if(!corpo) return;
+                corpo.innerHTML = '';
+                var lista;
+                try{ lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]'); }
+                catch(e){ lista = []; }
+
+                function ehPendente(st){
+                    var s = (st||'').toLowerCase();
+                    return s === '' || s.indexOf('aguardando') === 0;
+                }
+
+                var adicionados = 0;
+                lista.forEach(function(it, idx){
+                    var origem = (it.origem||'cliente').toLowerCase();
+                    var st = it.status || '';
+                    if(origem !== 'cliente') return;
+                    if(!ehPendente(st)) return; // mostra apenas aguardando decisão/início
+
+                    var tr = document.createElement('tr');
+                    var tdNum = document.createElement('td');
+                    var tdData = document.createElement('td');
+                    var tdServ = document.createElement('td');
+                    var tdValor = document.createElement('td');
+                    var tdDia = document.createElement('td');
+                    var tdEnd = document.createElement('td');
+                    var tdObs = document.createElement('td');
+                    var tdAcoes = document.createElement('td');
+
+                    tdNum.textContent = it.numero || '—';
+                    tdData.textContent = it.data || '—';
+                    tdServ.textContent = (it.tipo||'') + ' - ' + (it.servico||'');
+                    var total = Number(it.total||0);
+                    tdValor.textContent = isFinite(total) ? total.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'R$ 0,00';
+                    var dataHora = (it.dataDesejada||it.data||'') + (it.hora? (' ' + it.hora):'');
+                    tdDia.textContent = dataHora || '—';
+                    tdEnd.textContent = it.endereco || '—';
+                    tdObs.textContent = it.observacoes || it.obs || '—';
+
+                    var aceitar = document.createElement('button');
+                    aceitar.className = 'btn btn-sm';
+                    aceitar.textContent = 'Aceitar';
+                    aceitar.addEventListener('click', function(){
+                        var emailPrest = '';
+                        try{ emailPrest = localStorage.getItem('emailPrestador') || ''; }catch(e){}
+                        lista[idx].status = 'Aceito pelo Prestador';
+                        if(emailPrest){ lista[idx].prestadorAceito = emailPrest; }
+                        try{ localStorage.setItem('solicitacoes', JSON.stringify(lista)); }catch(e){}
+                        carregarLista();
+                    });
+                    var rejeitar = document.createElement('button');
+                    rejeitar.className = 'btn btn-sm btn-warning';
+                    rejeitar.textContent = 'Rejeitar';
+                    rejeitar.addEventListener('click', function(){
+                        lista[idx].status = 'Rejeitado pelo Prestador';
+                        try{ localStorage.setItem('solicitacoes', JSON.stringify(lista)); }catch(e){}
+                        carregarLista();
+                    });
+
+                    tdAcoes.appendChild(aceitar);
+                    var sep = document.createTextNode(' ');
+                    tdAcoes.appendChild(sep);
+                    tdAcoes.appendChild(rejeitar);
+
+                    tr.appendChild(tdNum);
+                    tr.appendChild(tdData);
+                    tr.appendChild(tdServ);
+                    tr.appendChild(tdValor);
+                    tr.appendChild(tdDia);
+                    tr.appendChild(tdEnd);
+                    tr.appendChild(tdObs);
+                    tr.appendChild(tdAcoes);
+                    corpo.appendChild(tr);
+                    adicionados++;
+                });
+
+                if(adicionados === 0){
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    td.colSpan = 8;
+                    td.textContent = 'Nenhuma solicitação de clientes no momento.';
+                    tr.appendChild(td);
+                    corpo.appendChild(tr);
+                }
+            }
+            carregarLista();
+
+            function obter(){
+                try{ return JSON.parse(localStorage.getItem('solicitacoes')||'[]'); }catch(e){ return []; }
+            }
+            function salvar(lista){
+                try{ localStorage.setItem('solicitacoes', JSON.stringify(lista)); }catch(e){}
+            }
+            function temExecucao(lista){
+                for(var i=0;i<lista.length;i++) if((lista[i].status||'').toLowerCase()==='em execução') return i;
+                return -1;
+            }
+            function contarPendentes(lista){
+                return lista.filter(function(it){ return (it.status||'').toLowerCase()==='pendente'; }).length;
+            }
+            function formatBRL(v){ var n=Number(v||0); return isFinite(n)? n.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'R$ 0,00'; }
+
+            function renderNovos(){
+                var corpo=document.getElementById('lista-novos'); if(!corpo) return; corpo.innerHTML='';
+                var lista=obter();
+                var execIndex=temExecucao(lista);
+                var adicionados=0;
+                lista.forEach(function(it, idx){
+                    var st=(it.status||'');
+                    var origem=(it.origem||'cliente').toLowerCase();
+                    var aguardando = st.indexOf('Aguardando')===0;
+                    var aceito = st==='Aceito pelo Prestador';
+                    if(origem!=='cliente') return;
+                    if(!aguardando && !aceito) return;
+
+                    var tr=document.createElement('tr');
+                    function td(t){ var e=document.createElement('td'); e.textContent=t; tr.appendChild(e);}
+                    td(it.numero||'—');
+                    td(it.data||'—');
+                    td(it.cliente||'—');
+                    td((it.tipo||'')+' - '+(it.servico||''));
+                    td(formatBRL(it.total));
+                    td(((it.dataDesejada||it.data||'') + (it.hora? (' '+it.hora):''))||'—');
+                    td(it.endereco||'—');
+                    td(it.observacoes||it.obs||'—');
+                    var tdA=document.createElement('td');
+
+                    if(aguardando){
+                        var btAce=document.createElement('button'); btAce.className='btn btn-sm'; btAce.textContent='Aceitar';
+                        btAce.addEventListener('click', function(){ lista[idx].status='Aceito pelo Prestador'; salvar(lista); renderTudo(); });
+                        var btRej=document.createElement('button'); btRej.className='btn btn-sm btn-warning'; btRej.textContent='Rejeitar';
+                        btRej.addEventListener('click', function(){ lista[idx].status='Rejeitado pelo Prestador'; salvar(lista); renderTudo(); });
+                        tdA.appendChild(btAce); tdA.appendChild(document.createTextNode(' ')); tdA.appendChild(btRej);
+                    }
+                    if(aceito){
+                        var btIni=document.createElement('button'); btIni.className='btn btn-sm'; btIni.textContent='Iniciar';
+                        btIni.disabled = execIndex !== -1; // só se não houver execuçao
+                        btIni.addEventListener('click', function(){ if(temExecucao(lista)!==-1){return;} lista[idx].status='Em execução'; salvar(lista); renderTudo(); });
+                        tdA.appendChild(btIni);
+                    }
+                    tr.appendChild(tdA);
+                    corpo.appendChild(tr);
+                    adicionados++;
+                });
+                if(adicionados===0){ var tr=document.createElement('tr'); var td=document.createElement('td'); td.colSpan=9; td.textContent='Não há novos serviços.'; tr.appendChild(td); corpo.appendChild(tr);}            }
+
+            function renderExecucao(){
+                var box=document.getElementById('execucao-conteudo'); if(!box) return; box.innerHTML='';
+                var lista=obter(); var idx=temExecucao(lista);
+                if(idx===-1){ box.textContent='Não há serviço em execução.'; return; }
+                var it=lista[idx];
+                var wrap=document.createElement('div');
+                wrap.innerHTML = '<p><strong>Número:</strong> '+(it.numero||'—')+'</p>'+
+                                 '<p><strong>Serviço:</strong> '+((it.tipo||'')+' - '+(it.servico||''))+'</p>'+
+                                 '<p><strong>Cliente:</strong> '+(it.cliente||'—')+'</p>';
+                var bPend=document.createElement('button'); bPend.className='btn btn-sm btn-warning'; bPend.textContent='Colocar Pendente';
+                bPend.addEventListener('click', function(){
+                    var motivo = prompt('Informe o motivo da pendência:');
+                    if(!motivo || !motivo.trim()) { alert('Motivo é obrigatório.'); return; }
+                    if(contarPendentes(lista) >= 3){ alert('Limite máximo de 3 pendências atingido.'); return; }
+                    lista[idx].status='Pendente';
+                    lista[idx].pendenciaMotivo=motivo.trim();
+                    salvar(lista); renderTudo();
+                });
+                var bConc=document.createElement('button'); bConc.className='btn btn-sm'; bConc.textContent='Concluir';
+                bConc.addEventListener('click', function(){ lista[idx].status='Concluída'; lista[idx].concluidoEm=new Date().toISOString(); salvar(lista); renderTudo(); });
+                wrap.appendChild(bPend); wrap.appendChild(document.createTextNode(' ')); wrap.appendChild(bConc);
+                box.appendChild(wrap);
+            }
+
+            function renderPendentes(){
+                var corpo=document.getElementById('lista-pendentes'); if(!corpo) return; corpo.innerHTML='';
+                var lista=obter(); var execAtivo = temExecucao(lista) !== -1; var add=0;
+                lista.forEach(function(it, idx){
+                    if((it.status||'').toLowerCase()!=='pendente') return;
+                    var tr=document.createElement('tr');
+                    function td(t){ var e=document.createElement('td'); e.innerHTML=t; tr.appendChild(e);}
+                    td(it.numero||'—');
+                    td(it.data||'—');
+                    td((it.tipo||'')+' - '+(it.servico||''));
+                    td((it.cliente||'—')+'<br><small>'+(it.pendenciaMotivo||'')+'</small>');
+                    var tdA=document.createElement('td');
+                    var btCont=document.createElement('button'); btCont.className='btn btn-sm'; btCont.textContent='Continuar';
+                    btCont.disabled = execAtivo; // só se não houver execução
+                    btCont.addEventListener('click', function(){ if(temExecucao(lista)!==-1){return;} lista[idx].status='Em execução'; delete lista[idx].pendenciaMotivo; salvar(lista); renderTudo(); });
+                    tdA.appendChild(btCont);
+                    tr.appendChild(tdA);
+                    corpo.appendChild(tr); add++;
+                });
+                if(add===0){ var tr=document.createElement('tr'); var td=document.createElement('td'); td.colSpan=5; td.textContent='Não há serviços pendentes.'; tr.appendChild(td); corpo.appendChild(tr);}            }
+
+            function renderTudo(){ renderNovos(); renderExecucao(); renderPendentes(); }
+            renderTudo();
+            window.addEventListener('storage', renderTudo);
         })();
     </script>
 </body>

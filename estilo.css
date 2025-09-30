@@ -70,6 +70,12 @@ h1, h2, h3 {
     margin-top: 10px;
     color: #0056b3;
 }
+.links-cadastro .btn + .btn { margin-top: 10px; }
+.links-cadastro a.btn,
+.links-cadastro a.btn:link,
+.links-cadastro a.btn:visited {
+    color: #fff;
+}
 .header-cliente {
     text-align: right;
     margin-bottom: 20px;
@@ -101,3 +107,4 @@ h1, h2, h3 {
     cursor: pointer;
     margin: 0 5px;
 }
+.aviso-sem-solicitacoes { margin-top: 8px; color: #b94a48; display: none; }

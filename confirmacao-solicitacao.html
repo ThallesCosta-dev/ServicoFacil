@@ -11,32 +11,66 @@
         <div class="card text-center">
             <h2>Solicitação Confirmada</h2>
             <p><strong>Número de solicitação:</strong> <span id="num"></span></p>
-            <p><strong>Prestador:</strong> artur@gmail.com</p>
+            <p><strong>Prestador:</strong> <span id="prestador-label">Aguardando aceitação do prestador</span></p>
+            <p><strong>Status:</strong> <span id="status-label">Aguardando aceitação do Prestador</span></p>
             <a href="lista-solicitacoes.html" class="btn">Ir para sua lista de solicitações</a>
         </div>
     </div>
     <script>
         (function(){
-            function gerarNumero(){
-                return String(Date.now()).slice(-7);
-            }
+            function gerarNumero(){ return String(Date.now()).slice(-7); }
             var p = new URLSearchParams(location.search);
-            var registro = {
-                numero: gerarNumero(),
-                data: new Date().toLocaleDateString('pt-BR'),
-                tipo: p.get('tipo-servico') || 'Serviço',
-                servico: p.get('servico') || '—',
-                total: p.get('total') || '0.00',
-                status: 'Aguardando início'
-            };
+            var numeroParam = p.get('numero');
+
+            var clienteEmail = '';
+            try{ clienteEmail = localStorage.getItem('emailCliente') || ''; }catch(e){}
+
+            var registro = null;
             try{
-                var lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
-                lista.unshift(registro);
-                localStorage.setItem('solicitacoes', JSON.stringify(lista));
-            }catch(e){
-                console.error('Erro ao salvar solicitação', e);
+                var listaExistente = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
+                if(numeroParam){
+                    registro = listaExistente.find(function(it){ return String(it.numero) === String(numeroParam); }) || null;
+                }
+            }catch(e){}
+
+            if(!registro){
+                var novo = {
+                    numero: gerarNumero(),
+                    data: new Date().toLocaleDateString('pt-BR'),
+                    origem: (p.get('origem')||'cliente'),
+                    cliente: clienteEmail,
+                    tipo: p.get('tipo-servico') || 'Serviço',
+                    servico: p.get('servico') || '—',
+                    precoBase: p.get('preco') || '0.00',
+                    credito: p.get('credito') || '0.00',
+                    taxa: p.get('taxa') || '0.00',
+                    cupom: p.get('cupom') || '',
+                    pagamento: p.get('pagamento') || '',
+                    dataDesejada: p.get('data') || '',
+                    hora: p.get('hora') || '',
+                    endereco: p.get('endereco') || '',
+                    observacoes: p.get('obs') || '',
+                    total: p.get('total') || '0.00',
+                    status: 'Aguardando aceitação do Prestador'
+                };
+                try{
+                    var lista = JSON.parse(localStorage.getItem('solicitacoes')||'[]');
+                    lista.unshift(novo);
+                    localStorage.setItem('solicitacoes', JSON.stringify(lista));
+                }catch(e){ console.error('Erro ao salvar solicitação', e); }
+                registro = novo;
             }
+
             document.getElementById('num').textContent = registro.numero;
+
+            var prest = registro.prestadorAceito || registro.prestador || '';
+            var spanPrest = document.getElementById('prestador-label');
+            if(prest){ spanPrest.textContent = prest; }
+            else { spanPrest.textContent = 'Aguardando aceitação do prestador'; }
+
+            var statusEl = document.getElementById('status-label');
+            var st = (registro.status||'').trim() || 'Aguardando aceitação do Prestador';
+            statusEl.textContent = st;
         })();
     </script>
 </body>
