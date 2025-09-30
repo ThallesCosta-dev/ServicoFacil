@@ -56,6 +56,7 @@
                     return s === '' || s.indexOf('aguardando') === 0;
                 }
 
+                var adicionados = 0;
                 lista.forEach(function(it, idx){
                     var origem = (it.origem||'cliente').toLowerCase();
                     var st = it.status || '';
@@ -113,7 +114,17 @@
                     tr.appendChild(tdObs);
                     tr.appendChild(tdAcoes);
                     corpo.appendChild(tr);
+                    adicionados++;
                 });
+
+                if(adicionados === 0){
+                    var tr = document.createElement('tr');
+                    var td = document.createElement('td');
+                    td.colSpan = 8;
+                    td.textContent = 'Nenhuma solicitação de clientes no momento.';
+                    tr.appendChild(td);
+                    corpo.appendChild(tr);
+                }
             }
             carregarLista();
         })();
