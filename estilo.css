@@ -71,7 +71,11 @@ h1, h2, h3 {
     color: #0056b3;
 }
 .links-cadastro .btn + .btn { margin-top: 10px; }
-.links-cadastro a.btn { color: #fff; }
+.links-cadastro a.btn,
+.links-cadastro a.btn:link,
+.links-cadastro a.btn:visited {
+    color: #fff;
+}
 .header-cliente {
     text-align: right;
     margin-bottom: 20px;
